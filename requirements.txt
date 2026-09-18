@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+qrcode
+Pillow
+gunicorn
+psycopg2-binary
