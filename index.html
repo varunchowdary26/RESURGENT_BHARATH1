@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="google-site-verification"content="google-site-verification: google5726d6a8f0cea6fd.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resurgent Bharath - Registration</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #05070d;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #aurora-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      animation: bgFade 1.5s ease forwards;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 520px;
+      animation: cinematicEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes bgFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes cinematicEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 2.2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: .25rem .75rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(249, 135, 56, 0.25);
+      color: #fed7aa;
+      border: 1px solid rgba(249, 135, 56, 0.4);
+      border-radius: 9999px;
+      margin-bottom: .6rem;
+    }
+
+    .header h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 40%, #fed7aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      font-size: .85rem;
+      color: #94a3b8;
+      margin-top: .5rem;
+      line-height: 1.45;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-row { display: flex; gap: 1rem; }
+    .form-row .form-group { flex: 1; }
+
+    label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #cbd5e1;
+      margin-bottom: .35rem;
+    }
+
+    .optional-tag {
+      font-size: .65rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: none;
+      letter-spacing: normal;
+      margin-left: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: .7rem .9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: .88rem;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      transition: all .2s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 75px;
+    }
+
+    input::placeholder, textarea::placeholder { color: #64748b; }
+    select option { background: #0f172a; color: #ffffff; }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #f98738;
+      box-shadow: 0 0 0 3px rgba(249, 135, 56, 0.25);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: .85rem;
+      background: linear-gradient(135deg, #f98738 0%, #b497cf 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      margin-top: .5rem;
+      transition: transform .15s, opacity .2s;
+    }
+
+    .btn-submit:hover { opacity: .95; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+    .alert {
+      padding: .75rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Showcase Container */
+    .showcase-card {
+      margin-top: 1.5rem;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .showcase-header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .showcase-badge {
+      display: inline-block;
+      padding: .25rem .75rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(249, 135, 56, 0.25);
+      color: #fed7aa;
+      border: 1px solid rgba(249, 135, 56, 0.4);
+      border-radius: 9999px;
+      margin-bottom: .4rem;
+    }
+
+    .showcase-header h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 40%, #fed7aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slideshow-viewport {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+      background: #020617;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.08) translateY(8px);
+      filter: blur(6px);
+      transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 1.1s;
+      z-index: 1;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      filter: blur(0px);
+      z-index: 2;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(5, 7, 13, 0.92) 0%, rgba(5, 7, 13, 0.35) 45%, transparent 75%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.25rem 1.25rem 1rem 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .slide-caption-tag {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #fed7aa;
+      margin-bottom: .25rem;
+    }
+
+    .slide-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    .slide-desc {
+      font-size: .78rem;
+      color: #cbd5e1;
+      margin-top: .15rem;
+    }
+
+    .slideshow-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 4;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .slideshow-nav:hover {
+      background: rgba(249, 135, 56, 0.85);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .nav-prev { left: 10px; }
+    .nav-next { right: 10px; }
+
+    .slideshow-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: .45rem;
+      margin-top: 1rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: all 0.35s ease;
+    }
+
+    .dot.active {
+      width: 24px;
+      background: #f98738;
+      box-shadow: 0 0 10px rgba(249, 135, 56, 0.7);
+    }
+
+    .footer-actions {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .6rem;
+    }
+
+    .footer-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: .6rem 1.15rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all .2s ease;
+    }
+
+    .footer-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="aurora-canvas"></canvas>
+
+  <div class="wrapper">
+    <div class="card">
+      <div class="header">
+        <span class="badge-tag">Open Innovation Hub</span>
+        <h1>Resurgent Bharath</h1>
+        <p>Register now to receive your verified event QR entrance pass.</p>
+      </div>
+
+      <div id="statusMessage" class="alert"></div>
+
+      <form id="regForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required maxlength="100" placeholder="e.g. Shivaa" />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number (10 digits)</label>
+          <input type="tel" id="phone" required pattern="[0-9]{10}" maxlength="10" placeholder="WhatsApp.No" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="age">Age</label>
+            <select id="age" required>
+              <option value="" disabled selected>Select Age</option>
+              <option value="18-22">18-22</option>
+              <option value="22-25">22-25</option>
+              <option value="26-30">26-30</option>
+              <option value=">31">>31</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+              <option value="" disabled selected>Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Your Location</label>
+          <input type="text" id="location" required maxlength="150" placeholder="e.g. Chennai, Tamil Nadu" />
+        </div>
+
+        <div class="form-group">
+          <label for="ideaBrief">Innovative Idea / Patent Brief <span class="optional-tag">(Optional)</span></label>
+          <textarea id="ideaBrief" maxlength="2000" placeholder="Share your innovative idea, patent proposal, or tech brief (optional)..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="guestQuestion">Question to Chief Guests <span class="optional-tag">(Optional)</span></label>
+          <textarea id="guestQuestion" maxlength="1500" placeholder="Ask a question or topic you would like the chief guests to address (optional)..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit">Register for Event</button>
+      </form>
+    </div>
+
+    <!-- Pride of India Showcase Container -->
+    <div class="showcase-card">
+      <div class="showcase-header">
+        <span class="showcase-badge">Showcase</span>
+        <h2>Pride of India</h2>
+      </div>
+
+      <div class="slideshow-viewport" id="slideshowViewport">
+        <!-- Slide 1 -->
+        <div class="slide active">
+          <img src="img1.jpeg" alt="Padmanabhaswamy Temple" onerror="tryAlternateExtensions(this, 'img1')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 01 / 07</span>
+            <div class="slide-title">Padmanabhaswamy Temple</div>
+            <div class="slide-desc">In 1750, King Marthanda Varma of Travancore dedicated the entire kingdom to the deity. The royal family ruled as Padmanabha Dasa.</div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+          <img src="img2.jpeg" alt="Kedarnath Temple" onerror="tryAlternateExtensions(this, 'img2')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 02 / 07</span>
+            <div class="slide-title">Kedarnath Temple</div>
+            <div class="slide-desc">It is the highest and one of the most sacred among the 12 holy Jyotirlingas in the world.</div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+          <img src="img3.jpeg" alt="Kamakhya Temple" onerror="tryAlternateExtensions(this, 'img3')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 03 / 07</span>
+            <div class="slide-title">The Kamakhya Temple in Guwahati</div>
+            <div class="slide-desc">The temple has no statue or image of the deity. Instead, worshippers revere a natural cleft inside an underground cave.</div>
+          </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+          <img src="img4.jpeg" alt="Vaishno Devi Temple" onerror="tryAlternateExtensions(this, 'img4')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 04 / 07</span>
+            <div class="slide-title">The Vaishno Devi Temple</div>
+            <div class="slide-desc">It is a famous cave shrine located in the Trikuta Mountains near Katra in Jammu and Kashmir, sitting at an altitude of about 5,200 feet.</div>
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+          <img src="img5.jpeg" alt="Kalighat Kali Temple" onerror="tryAlternateExtensions(this, 'img5')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 05 / 07</span>
+            <div class="slide-title">Kalighat Kali Temple</div>
+            <div class="slide-desc">Located in South Kolkata, this is recognized as one of the 51 sacred Shakti Peethas where the idol features a distinct gold-plated long tongue.</div>
+          </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+          <img src="img6.jpeg" alt="Somnath Temple" onerror="tryAlternateExtensions(this, 'img6')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 06 / 07</span>
+            <div class="slide-title">The Somnath Temple</div>
+            <div class="slide-desc">The first and most sacred of the twelve Adi Jyotirlinga shrines dedicated to Lord Shiva.</div>
+          </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+          <img src="img7.jpeg" alt="Brihadeeswara Temple" onerror="tryAlternateExtensions(this, 'img7')" />
+          <div class="slide-overlay">
+            <span class="slide-caption-tag">Pride of India • 07 / 07</span>
+            <div class="slide-title">The Brihadeeswara Temple in Thanjavur</div>
+            <div class="slide-desc">A massive 11th-century Hindu temple built entirely of granite by Chola Emperor Raja Raja Chola.</div>
+          </div>
+        </div>
+
+        <button class="slideshow-nav nav-prev" id="prevSlide" aria-label="Previous image">&#10094;</button>
+        <button class="slideshow-nav nav-next" id="nextSlide" aria-label="Next image">&#10095;</button>
+      </div>
+
+      <div class="slideshow-dots" id="slideshowDots"></div>
+    </div>
+
+    <!-- Footer Action Buttons -->
+    <div class="footer-actions">
+      <a href="main.html" class="footer-btn">📋 Attendee List (Admin)</a>
+      <a href="welcome.html" class="footer-btn">🎟 View Pass</a>
+    </div>
+  </div>
+
+  <script>
+    function tryAlternateExtensions(img, baseName) {
+      const extensions = ['jpg', 'png', 'JPG', 'JPEG', 'webp'];
+      let attempt = parseInt(img.dataset.attempt || '0', 10);
+      
+      if (attempt < extensions.length) {
+        img.dataset.attempt = (attempt + 1).toString();
+        img.src = `${baseName}.${extensions[attempt]}`;
+      } else {
+        img.onerror = null;
+      }
+    }
+
+    const form = document.getElementById("regForm");
+    const statusMsg = document.getElementById("statusMessage");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showAlert(text) {
+      statusMsg.textContent = text;
+      statusMsg.className = "alert alert-error";
+      statusMsg.style.display = "block";
+    }
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      statusMsg.style.display = "none";
+      
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim().replace(/\D/g, '');
+      const age = document.getElementById("age").value;
+      const gender = document.getElementById("gender").value;
+      const location = document.getElementById("location").value.trim();
+      const ideaBrief = document.getElementById("ideaBrief").value.trim();
+      const guestQuestion = document.getElementById("guestQuestion").value.trim();
+
+      if (phone.length !== 10) {
+        showAlert("Please enter a valid 10-digit mobile number.");
+        return;
+      }
+
+      // Build structured optional content to preserve backend compatibility
+      let combinedQuestions = [];
+      if (ideaBrief) {
+        combinedQuestions.push(`[Idea/Patent Brief]: ${ideaBrief}`);
+      }
+      if (guestQuestion) {
+        combinedQuestions.push(`[Question to Chief Guests]: ${guestQuestion}`);
+      }
+      const questionsPayload = combinedQuestions.length > 0 ? combinedQuestions.join("\n\n") : "None submitted";
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Registering...";
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name, 
+            phone, 
+            age, 
+            gender, 
+            location, 
+            questions: questionsPayload,
+            ideaBrief: ideaBrief,
+            guestQuestion: guestQuestion
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          showAlert(data.message || "Registration failed. Please try again.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Register for Event";
+          return;
+        }
+
+        const regId = data.registrationId || data.registration_id;
+        window.location.href = `welcome.html?id=${encodeURIComponent(regId)}`;
+      } catch (err) {
+        console.error("Submission error:", err);
+        showAlert("Unable to connect to the server. Please check your connection.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Register for Event";
+      }
+    });
+  </script>
+
+  <!-- Pride of India Slideshow Sequential Controller -->
+  <script>
+    (function initPrideSlideshow() {
+      const slides = document.querySelectorAll(".slide");
+      const dotsContainer = document.getElementById("slideshowDots");
+      const prevBtn = document.getElementById("prevSlide");
+      const nextBtn = document.getElementById("nextSlide");
+      const viewport = document.getElementById("slideshowViewport");
+
+      if (!slides.length) return;
+
+      let currentIndex = 0;
+      let timer = null;
+      const slideDuration = 4000;
+
+      slides.forEach((_, idx) => {
+        const dot = document.createElement("div");
+        dot.className = `dot ${idx === 0 ? "active" : ""}`;
+        dot.addEventListener("click", () => {
+          goToSlide(idx);
+          resetTimer();
+        });
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = dotsContainer.querySelectorAll(".dot");
+
+      function showSlide(index) {
+        slides.forEach((s, idx) => {
+          s.classList.toggle("active", idx === index);
+        });
+        dots.forEach((d, idx) => {
+          d.classList.toggle("active", idx === index);
+        });
+        currentIndex = index;
+      }
+
+      function nextSlide() {
+        const nextIndex = (currentIndex + 1) % slides.length;
+        showSlide(nextIndex);
+      }
+
+      function prevSlide() {
+        const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+        showSlide(prevIndex);
+      }
+
+      function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(nextSlide, slideDuration);
+      }
+
+      nextBtn.addEventListener("click", () => {
+        nextSlide();
+        resetTimer();
+      });
+
+      prevBtn.addEventListener("click", () => {
+        prevSlide();
+        resetTimer();
+      });
+
+      viewport.addEventListener("mouseenter", () => clearInterval(timer));
+      viewport.addEventListener("mouseleave", () => resetTimer());
+
+      function goToSlide(idx) {
+        showSlide(idx);
+      }
+
+      timer = setInterval(nextSlide, slideDuration);
+    })();
+  </script>
+
+  <script>
+    (function initAurora() {
+      const canvas = document.getElementById("aurora-canvas");
+      const gl = canvas.getContext("webgl");
+      if (!gl) return;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      const vsSource = `attribute vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
+      const fsSource = `
+        precision mediump float;
+        uniform float uTime;
+        uniform vec2 uResolution;
+        void main() {
+          vec2 uv = gl_FragCoord.xy / uResolution;
+          float wave1 = sin(uv.x * 3.0 + uTime * 0.6) * 0.16;
+          float wave2 = cos(uv.x * 4.5 - uTime * 0.45) * 0.12;
+          float wave = wave1 + wave2;
+          float intensity = smoothstep(0.20, 0.80, 1.0 - abs(uv.y - 0.5 - wave));
+          
+          vec3 col1 = vec3(0.92, 0.48, 0.18);
+          vec3 col2 = vec3(0.58, 0.42, 0.75);
+          vec3 bgCol = vec3(0.02, 0.03, 0.07);
+
+          vec3 color = mix(col1, col2, uv.x + sin(uTime * 0.25) * 0.3);
+          vec3 finalColor = mix(bgCol, color, intensity * 0.52);
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `;
+
+      function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return shader;
+      }
+
+      const program = gl.createProgram();
+      gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+      gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+
+      const posLoc = gl.getAttribLocation(program, "position");
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+      const timeLoc = gl.getUniformLocation(program, "uTime");
+      const resLoc = gl.getUniformLocation(program, "uResolution");
+
+      function render(time) {
+        gl.uniform1f(timeLoc, time * 0.001);
+        gl.uniform2f(resLoc, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Authentication - Resurgent Bharath</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background-color: #05070d;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    #ballpit-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      display: block;
+      pointer-events: auto;
+    }
+    .wrapper { 
+      position: relative; 
+      z-index: 2; 
+      width: 100%; 
+      max-width: 420px;
+      animation: cinematicEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      pointer-events: none;
+    }
+    @keyframes cinematicEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .card {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 2.2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      text-align: center;
+    }
+    h1 { color: #f98738; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 800; }
+    p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.4; }
+    .form-group { margin-bottom: 1rem; text-align: left; }
+    label { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; margin-bottom: 0.35rem; }
+    input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.9rem;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+      transition: all 0.2s;
+    }
+    input:focus { border-color: #f98738; box-shadow: 0 0 0 3px rgba(249, 135, 56, 0.25); }
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, #f98738 0%, #b497cf 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.95; }
+    .alert { padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+    .alert-error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .alert-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .footer-link { margin-top: 1.25rem; }
+    .footer-link a { color: #94a3b8; font-size: 0.8rem; text-decoration: none; }
+    .footer-link a:hover { color: white; }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<canvas id="ballpit-canvas"></canvas>
+
+<div class="wrapper">
+  <div class="card">
+    <h1 id="formTitle">Admin Login</h1>
+    <p id="formSub">Access the attendee directory and scanner portal.</p>
+
+    <div id="statusAlert" class="alert"></div>
+
+    <form id="authForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" required placeholder="admin" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-submit">Login</button>
+    </form>
+
+    <div class="footer-link">
+      <a href="index.html">← Return to Registration</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isSetupMode = false;
+  const targetRedirect = new URLSearchParams(window.location.search).get("redirect") || "main.html";
+
+  const formTitle = document.getElementById("formTitle");
+  const formSub = document.getElementById("formSub");
+  const submitBtn = document.getElementById("submitBtn");
+  const alertBox = document.getElementById("statusAlert");
+  const form = document.getElementById("authForm");
+
+  function showAlert(msg, isSuccess = false) {
+    alertBox.textContent = msg;
+    alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-error'}`;
+    alertBox.style.display = "block";
+  }
+
+  async function checkAdminStatus() {
+    try {
+      const res = await fetch("/api/admin/status");
+      const data = await res.json();
+      if (!data.exists) {
+        isSetupMode = true;
+        formTitle.textContent = "Create Master Admin";
+        formSub.textContent = "No admin found. Create the single master administrator account:";
+        submitBtn.textContent = "Create Account";
+      } else {
+        isSetupMode = false;
+        formTitle.textContent = "Admin Login";
+        formSub.textContent = "Enter your administrator credentials to proceed:";
+        submitBtn.textContent = "Login";
+      }
+    } catch (e) {
+      showAlert("Connecting to authentication server...");
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    const endpoint = isSetupMode ? "/api/admin/setup" : "/api/admin/login";
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showAlert(data.message || "Authentication failed.");
+        return;
+      }
+
+      sessionStorage.setItem("rb_admin_logged_in", "true");
+      sessionStorage.setItem("rb_admin_user", username);
+      showAlert(isSetupMode ? "Admin created! Redirecting..." : "Login successful! Redirecting...", true);
+
+      setTimeout(() => {
+        window.location.href = targetRedirect;
+      }, 700);
+    } catch (err) {
+      showAlert("Unable to connect to authentication server.");
+    }
+  });
+
+  checkAdminStatus();
+</script>
+
+<script>
+  (function initBallpit() {
+    const canvas = document.getElementById('ballpit-canvas');
+    if (!canvas || !window.THREE) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 20);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Muted ambient and directional light levels
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xd97706, 0.8);
+    dirLight1.position.set(10, 15, 10);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x7c3aed, 0.6);
+    dirLight2.position.set(-10, -10, 10);
+    scene.add(dirLight2);
+
+    const count = 110;
+    const geometry = new THREE.SphereGeometry(1, 24, 24);
+    
+    // Translucent, less glossy material for subtle background visibility
+    const material = new THREE.MeshStandardMaterial({
+      roughness: 0.65,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.45
+    });
+
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+    scene.add(instancedMesh);
+
+    // Muted, desaturated color palette
+    const colors = [
+      new THREE.Color(0x78350f), // Soft dark amber
+      new THREE.Color(0x4c1d95), // Deep muted violet
+      new THREE.Color(0x1e3a8a), // Muted dark blue
+      new THREE.Color(0x334155), // Slate gray
+      new THREE.Color(0x1f2937)  // Charcoal
+    ];
+
+    const pos = new Float32Array(count * 3);
+    const vel = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+
+    let maxX = 9;
+    let maxY = 6;
+    const maxZ = 2.5;
+
+    function resizeBounds() {
+      const aspect = window.innerWidth / window.innerHeight;
+      camera.aspect = aspect;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const fovRad = (camera.fov * Math.PI) / 180;
+      const wHeight = 2 * Math.tan(fovRad / 2) * camera.position.z;
+      const wWidth = wHeight * aspect;
+
+      maxX = wWidth / 2;
+      maxY = wHeight / 2;
+    }
+    window.addEventListener('resize', resizeBounds);
+    resizeBounds();
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      pos[idx] = (Math.random() - 0.5) * maxX * 1.5;
+      pos[idx + 1] = (Math.random() - 0.5) * maxY * 1.5;
+      pos[idx + 2] = (Math.random() - 0.5) * maxZ * 2;
+
+      vel[idx] = (Math.random() - 0.5) * 0.04;
+      vel[idx + 1] = (Math.random() - 0.5) * 0.04;
+      vel[idx + 2] = (Math.random() - 0.5) * 0.04;
+
+      sizes[i] = i === 0 ? 1.4 : 0.45 + Math.random() * 0.55;
+
+      const col = colors[Math.floor(Math.random() * colors.length)];
+      instancedMesh.setColorAt(i, col);
+    }
+    instancedMesh.instanceColor.needsUpdate = true;
+
+    const mouse = new THREE.Vector2(9999, 9999);
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const mouseWorld = new THREE.Vector3(9999, 9999, 0);
+
+    function onPointerMove(e) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      mouse.x = (clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      raycaster.ray.intersectPlane(plane, mouseWorld);
+    }
+    window.addEventListener('mousemove', onPointerMove, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+
+    const gravity = 0.03;
+    const friction = 0.650;
+    const bounce = 0.40;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (mouseWorld.x !== 9999) {
+        pos[0] += (mouseWorld.x - pos[0]) * 0.15;
+        pos[1] += (mouseWorld.y - pos[1]) * 0.15;
+        pos[2] += (0 - pos[2]) * 0.15;
+      }
+
+      for (let i = 1; i < count; i++) {
+        const i3 = i * 3;
+
+        vel[i3 + 1] -= gravity * sizes[i] * 0.1;
+        vel[i3] *= friction;
+        vel[i3 + 1] *= friction;
+        vel[i3 + 2] *= friction;
+
+        pos[i3] += vel[i3];
+        pos[i3 + 1] += vel[i3 + 1];
+        pos[i3 + 2] += vel[i3 + 2];
+
+        const r = sizes[i];
+
+        if (pos[i3] + r > maxX) { pos[i3] = maxX - r; vel[i3] = -vel[i3] * bounce; }
+        if (pos[i3] - r < -maxX) { pos[i3] = -maxX + r; vel[i3] = -vel[i3] * bounce; }
+        if (pos[i3 + 1] + r > maxY) { pos[i3 + 1] = maxY - r; vel[i3 + 1] = -vel[i3 + 1] * bounce; }
+        if (pos[i3 + 1] - r < -maxY) { pos[i3 + 1] = -maxY + r; vel[i3 + 1] = -vel[i3 + 1] * bounce; }
+        if (pos[i3 + 2] + r > maxZ) { pos[i3 + 2] = maxZ - r; vel[i3 + 2] = -vel[i3 + 2] * bounce; }
+        if (pos[i3 + 2] - r < -maxZ) { pos[i3 + 2] = -maxZ + r; vel[i3 + 2] = -vel[i3 + 2] * bounce; }
+
+        const dx0 = pos[i3] - pos[0];
+        const dy0 = pos[i3 + 1] - pos[1];
+        const dz0 = pos[i3 + 2] - pos[2];
+        const dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
+        const minDist0 = r + sizes[0];
+
+        if (dist0 < minDist0 && dist0 > 0.001) {
+          const overlap = (minDist0 - dist0);
+          const nx = dx0 / dist0;
+          const ny = dy0 / dist0;
+          const nz = dz0 / dist0;
+
+          pos[i3] += nx * overlap;
+          pos[i3 + 1] += ny * overlap;
+          pos[i3 + 2] += nz * overlap;
+
+          vel[i3] += nx * 0.15;
+          vel[i3 + 1] += ny * 0.15;
+          vel[i3 + 2] += nz * 0.15;
+        }
+
+        for (let j = i + 1; j < count; j++) {
+          const j3 = j * 3;
+          const dx = pos[j3] - pos[i3];
+          const dy = pos[j3 + 1] - pos[i3 + 1];
+          const dz = pos[j3 + 2] - pos[i3 + 2];
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          const minDist = r + sizes[j];
+
+          if (dist < minDist && dist > 0.001) {
+            const overlap = (minDist - dist) * 0.5;
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const nz = dz / dist;
+
+            pos[i3] -= nx * overlap;
+            pos[i3 + 1] -= ny * overlap;
+            pos[i3 + 2] -= nz * overlap;
+
+            pos[j3] += nx * overlap;
+            pos[j3 + 1] += ny * overlap;
+            pos[j3 + 2] += nz * overlap;
+
+            vel[i3] -= nx * 0.02;
+            vel[i3 + 1] -= ny * 0.02;
+            vel[i3 + 2] -= nz * 0.02;
+
+            vel[j3] += nx * 0.02;
+            vel[j3 + 1] -= ny * 0.02;
+            vel[j3 + 2] -= nz * 0.02;
+          }
+        }
+      }
+
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        dummy.position.set(pos[i3], pos[i3 + 1], pos[i3 + 2]);
+        dummy.scale.setScalar(sizes[i]);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+</script>
+</body>
+</html>

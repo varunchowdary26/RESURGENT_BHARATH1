@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Event Pass - Resurgent Bharath</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #05070d;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    #aurora-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      animation: bgFade 1.5s ease forwards;
+    }
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+      animation: cinematicEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes bgFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes cinematicEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+    }
+    .success-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      border: 2px solid rgba(16, 185, 129, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 10px;
+      color: #6ee7b7;
+    }
+    h1 { margin: 0; color: #f98738; font-size: 1.45rem; font-weight: 800; }
+    .qr-wrapper {
+      background: white;
+      padding: 10px;
+      border-radius: 14px;
+      width: fit-content;
+      margin: 14px auto 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    #qr { 
+      display: block; 
+      width: 160px; 
+      height: 160px; 
+      max-width: 55vw; 
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .registration-id {
+      color: #fed7aa;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .event-timing-banner {
+      background: rgba(249, 135, 56, 0.15);
+      border: 1px solid rgba(249, 135, 56, 0.35);
+      color: #fed7aa;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin: 10px 0 12px;
+      line-height: 1.4;
+    }
+    .mandatory-warning {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+    .details {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+    .detail {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.85rem;
+    }
+    .detail:last-child { border-bottom: none; }
+    .detail span:first-child { color: #94a3b8; }
+    .detail span:last-child { color: white; font-weight: 600; text-align: right; word-break: break-word; }
+    
+    .venue-card-box {
+      text-align: left;
+      background: rgba(249, 135, 56, 0.08);
+      border: 1px solid rgba(249, 135, 56, 0.3);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #fed7aa;
+    }
+    .venue-card-box strong {
+      color: #f98738;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+
+    .btn-stack { display: flex; flex-direction: column; gap: 8px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-download { background: linear-gradient(135deg, #10b981, #059669); color: white; font-size: 0.92rem; padding: 12px; }
+    .primary { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+    .secondary { background: rgba(255, 255, 255, 0.08); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.12); }
+    #lookupForm { margin: 15px 0; }
+    #lookupInput {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      margin-bottom: 10px;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    #lookupInput:focus { border-color: #f98738; box-shadow: 0 0 0 3px rgba(249, 135, 56, 0.25); }
+  </style>
+</head>
+<body>
+
+<canvas id="aurora-canvas"></canvas>
+
+<div class="wrapper">
+  <div class="card">
+    <div id="loading" style="padding: 20px; color: #94a3b8;">Loading verified event pass...</div>
+    <div id="error" style="display:none; color: #fca5a5; margin-bottom: 15px; font-size: 0.9rem;"></div>
+
+    <div id="lookupContainer" style="display:none;">
+      <h1>Find Your Event Pass</h1>
+      <p style="color:#94a3b8; font-size:.85rem; margin-top:5px;">Enter your Registration ID or Mobile Number to fetch your pass:</p>
+      <div id="lookupForm">
+        <input type="text" id="lookupInput" placeholder="e.g. RB-2026-0001 or 9876543210" autocomplete="off" />
+        <button class="btn primary" style="width: 100%;" onclick="searchId()">Retrieve Pass</button>
+      </div>
+      <a href="index.html" class="btn secondary" style="display:block;">← Back to Registration</a>
+    </div>
+
+    <div id="content" style="display:none;">
+      <div class="success-badge">✓</div>
+      <h1>Registration Confirmed</h1>
+      <div class="qr-wrapper">
+        <img id="qr" alt="Unique Entrance QR Code" crossorigin="anonymous" />
+      </div>
+      
+      <div id="registrationId" class="registration-id"></div>
+
+      <div class="event-timing-banner">
+        📅 Event Date & Time: 10th Oct from 3.30pm to 6pm
+      </div>
+
+      <div class="mandatory-warning">
+        ⚠️ Important: Please download or screenshot your QR pass now to present at the event entrance.
+      </div>
+
+      <div class="details">
+        <div class="detail"><span>Name</span><span id="name"></span></div>
+        <div class="detail"><span>Phone</span><span id="phone"></span></div>
+        <div class="detail"><span>Your Location</span><span id="location"></span></div>
+        <div class="detail"><span>Age / Gender</span><span id="ageGender"></span></div>
+        <div class="detail"><span>Tech Idea</span><span id="questions"></span></div>
+      </div>
+
+      <div class="venue-card-box">
+        <strong>📍 Event Venue:</strong>
+        364H+572, No.363, Arcot Rd, NSK Salai, Kodambakkam, Chennai, Tamil Nadu 600024
+      </div>
+
+      <div class="btn-stack">
+        <button id="downloadBtn" class="btn btn-download">⬇ Download Entry Pass</button>
+        <div class="btn-row">
+          <a href="index.html" class="btn secondary">New Registration</a>
+          <a href="main.html" class="btn secondary">Admin Directory</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const VENUE_ADDRESS = "364H+572, No.363, Arcot Rd, NSK Salai, Kodambakkam, Chennai, Tamil Nadu 600024";
+
+  const params = new URLSearchParams(window.location.search);
+  let registrationId = params.get("id");
+
+  const loading = document.getElementById("loading");
+  const errorBox = document.getElementById("error");
+  const content = document.getElementById("content");
+  const lookupContainer = document.getElementById("lookupContainer");
+
+  if (!registrationId) {
+    loading.style.display = "none";
+    lookupContainer.style.display = "block";
+  } else {
+    loadRegistration(registrationId.trim());
+  }
+
+  function searchId() {
+    const val = document.getElementById("lookupInput").value.trim();
+    if (val) {
+      window.location.href = `welcome.html?id=${encodeURIComponent(val)}`;
+    }
+  }
+
+  document.getElementById("lookupInput")?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") searchId();
+  });
+
+  // Helper function to wrap text neatly on the off-screen canvas
+  function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    let line = "";
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + " ";
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        ctx.fillText(line.trim(), x, y);
+        line = words[n] + " ";
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line.trim(), x, y);
+    return y + lineHeight;
+  }
+
+  async function loadRegistration(id) {
+    try {
+      const res = await fetch(`/api/registration/${encodeURIComponent(id)}`);
+      if (!res.ok) {
+        throw new Error("Registration pass not found. Please check your ID.");
+      }
+      const data = await res.json();
+
+      if (!data.success || !data.user) {
+        throw new Error(data.message || "Pass record could not be loaded.");
+      }
+
+      const user = data.user;
+      const cleanId = user.registration_id || id;
+      const userName = user.name || "-";
+      const userPhone = user.phone || "-";
+      const userLocation = user.location || "-";
+      
+      document.getElementById("registrationId").textContent = cleanId;
+      document.getElementById("name").textContent = userName;
+      document.getElementById("phone").textContent = userPhone;
+      document.getElementById("ageGender").textContent = `${user.age || "-"} / ${user.gender || "-"}`;
+      document.getElementById("location").textContent = userLocation;
+      document.getElementById("questions").textContent = user.questions || "-";
+
+      const qrUrl = `/api/qr/${encodeURIComponent(cleanId)}`;
+      const qrImg = document.getElementById("qr");
+      qrImg.src = qrUrl;
+
+      // Canvas generator that creates a pass ticket with details and venue address
+      document.getElementById("downloadBtn").onclick = async () => {
+        const downloadBtn = document.getElementById("downloadBtn");
+        downloadBtn.textContent = "Generating Pass...";
+        downloadBtn.disabled = true;
+
+        try {
+          const response = await fetch(qrUrl);
+          const blob = await response.blob();
+          const qrImage = new Image();
+          const qrLoadPromise = new Promise((resolve, reject) => {
+            qrImage.onload = () => resolve();
+            qrImage.onerror = reject;
+            qrImage.src = URL.createObjectURL(blob);
+          });
+          await qrLoadPromise;
+
+          // Set up 600px wide canvas with extended height (980px) for address & details
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = 600;
+          canvas.height = 980;
+
+          // Ticket Background
+          ctx.fillStyle = "#0a0f1d";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Top Accent Banner
+          ctx.fillStyle = "#f98738";
+          ctx.fillRect(0, 0, canvas.width, 10);
+
+          // Event Header
+          ctx.fillStyle = "#f98738";
+          ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("RESURGENT BHARATH", canvas.width / 2, 55);
+
+          ctx.fillStyle = "#94a3b8";
+          ctx.font = "600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText("VERIFIED OFFICIAL ENTRANCE PASS", canvas.width / 2, 78);
+
+          // White QR Code Container
+          const qrBoxSize = 250;
+          const qrBoxX = (canvas.width - qrBoxSize) / 2;
+          const qrBoxY = 100;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 16);
+          ctx.fill();
+
+          // QR Code
+          const qrSize = 220;
+          const qrOffset = (qrBoxSize - qrSize) / 2;
+          ctx.drawImage(qrImage, qrBoxX + qrOffset, qrBoxY + qrOffset, qrSize, qrSize);
+
+          // Registration ID Label
+          ctx.fillStyle = "#fed7aa";
+          ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText(cleanId, canvas.width / 2, 385);
+
+          // Separator
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(45, 410);
+          ctx.lineTo(canvas.width - 45, 410);
+          ctx.stroke();
+
+          // Draw Attendee Details Function
+          function drawInfoRow(label, value, y) {
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "600 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            ctx.fillText(label.toUpperCase(), 50, y);
+
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            
+            let displayVal = value;
+            if (ctx.measureText(displayVal).width > 310) {
+              while (ctx.measureText(displayVal + "...").width > 310 && displayVal.length > 0) {
+                displayVal = displayVal.slice(0, -1);
+              }
+              displayVal += "...";
+            }
+            ctx.fillText(displayVal, canvas.width - 50, y);
+          }
+
+          drawInfoRow("Name of the User", userName, 445);
+          drawInfoRow("Phone Number", userPhone, 485);
+          drawInfoRow("Your Location", userLocation, 525);
+
+          // Venue Box on Ticket
+          const venueBoxY = 560;
+          ctx.fillStyle = "rgba(249, 135, 56, 0.08)";
+          ctx.strokeStyle = "rgba(249, 135, 56, 0.35)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(45, venueBoxY, canvas.width - 90, 115, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#f98738";
+          ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText("📍 EVENT VENUE:", 60, venueBoxY + 28);
+
+          ctx.fillStyle = "#fed7aa";
+          ctx.font = "500 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          wrapCanvasText(ctx, VENUE_ADDRESS, 60, venueBoxY + 54, canvas.width - 120, 20);
+
+          // Date & Time Box
+          const bannerY = 695;
+          ctx.fillStyle = "rgba(249, 135, 56, 0.15)";
+          ctx.strokeStyle = "rgba(249, 135, 56, 0.4)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(45, bannerY, canvas.width - 90, 75, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#fed7aa";
+          ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText("DATE & TIME", canvas.width / 2, bannerY + 28);
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText("10th Oct from 3.30pm to 6pm", canvas.width / 2, bannerY + 54);
+
+          // Footer Notes
+          ctx.fillStyle = "#64748b";
+          ctx.font = "500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.fillText("Please present this digital ticket pass at the security desk.", canvas.width / 2, 820);
+          ctx.fillText("Resurgent Bharath • Open Innovation Hub", canvas.width / 2, 842);
+
+          // Download as PNG
+          canvas.toBlob((resultBlob) => {
+            const downloadUrl = URL.createObjectURL(resultBlob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `EventPass-${cleanId}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => {
+              URL.revokeObjectURL(downloadUrl);
+              URL.revokeObjectURL(qrImage.src);
+            }, 1000);
+          }, "image/png");
+
+        } catch(e) {
+          console.error("Pass generation error:", e);
+          alert("Unable to generate combined pass. Please take a screenshot of your screen.");
+        } finally {
+          downloadBtn.textContent = "⬇ Download Entry Pass";
+          downloadBtn.disabled = false;
+        }
+      };
+
+      loading.style.display = "none";
+      content.style.display = "block";
+    } catch (e) {
+      loading.style.display = "none";
+      errorBox.style.display = "block";
+      errorBox.textContent = e.message;
+      lookupContainer.style.display = "block";
+    }
+  }
+</script>
+
+<script>
+  (function initAurora() {
+    const canvas = document.getElementById("aurora-canvas");
+    const gl = canvas.getContext("webgl");
+    if (!gl) return;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const vsSource = `attribute vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
+    const fsSource = `
+      precision mediump float;
+      uniform float uTime;
+      uniform vec2 uResolution;
+      void main() {
+        vec2 uv = gl_FragCoord.xy / uResolution;
+        float wave1 = sin(uv.x * 3.0 + uTime * 0.6) * 0.16;
+        float wave2 = cos(uv.x * 4.5 - uTime * 0.45) * 0.12;
+        float wave = wave1 + wave2;
+        float intensity = smoothstep(0.20, 0.80, 1.0 - abs(uv.y - 0.5 - wave));
+        
+        vec3 col1 = vec3(0.92, 0.48, 0.18);
+        vec3 col2 = vec3(0.58, 0.42, 0.75);
+        vec3 bgCol = vec3(0.02, 0.03, 0.07);
+
+        vec3 color = mix(col1, col2, uv.x + sin(uTime * 0.25) * 0.3);
+        vec3 finalColor = mix(bgCol, color, intensity * 0.52);
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `;
+
+    function createShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      return shader;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+    gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+
+    const posLoc = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const timeLoc = gl.getUniformLocation(program, "uTime");
+    const resLoc = gl.getUniformLocation(program, "uResolution");
+
+    function render(time) {
+      gl.uniform1f(timeLoc, time * 0.001);
+      gl.uniform2f(resLoc, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  })();
+</script>
+</body>
+</html>

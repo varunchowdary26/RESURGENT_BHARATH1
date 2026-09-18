@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendee Directory - Resurgent Bharath</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background-color: #05070d;
+      color: #f8fafc;
+      padding: 1.5rem;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    #aurora-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      animation: bgFade 1.5s ease forwards;
+    }
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1240px;
+      margin: 0 auto;
+      animation: cinematicEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes bgFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes cinematicEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+        filter: blur(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .header-panel {
+      background: rgba(15,23,42,.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .header-panel h1 { font-size: 1.35rem; font-weight: 800; color: white; }
+    .count-highlight { color: #f98738; font-weight: 800; }
+    .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .btn {
+      padding: .6rem 1rem;
+      font-size: .85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-secondary { background: rgba(255,255,255,.08); color: #f1f5f9; border: 1px solid rgba(255,255,255,.15); }
+    .btn-primary { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border: none; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+    .btn-primary:hover { opacity: 0.95; }
+    .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+    .btn-logout { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center; }
+    .btn-checkin {
+      padding: .28rem .6rem;
+      font-size: .72rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      background: rgba(16,185,129,.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,.4);
+      margin-left: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-checkin:hover {
+      background: #10b981;
+      color: white;
+    }
+    .search-panel {
+      background: rgba(15,23,42,.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: .75rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .search-input {
+      width: 100%;
+      max-width: 380px;
+      padding: .55rem .85rem;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      color: white;
+      outline: none;
+    }
+    .table-card {
+      background: rgba(15,23,42,.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .table-container { 
+      max-height: 65vh; 
+      overflow-x: auto; 
+      overflow-y: auto; 
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      min-width: 1100px; 
+      text-align: left; 
+      font-size: .875rem; 
+    }
+    th {
+      background: rgba(15,23,42,.98);
+      color: #cbd5e1;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: .85rem .75rem;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      white-space: nowrap;
+    }
+    td { 
+      padding: .85rem .75rem; 
+      border-bottom: 1px solid rgba(255,255,255,.06); 
+      color: #e2e8f0; 
+      vertical-align: middle; 
+    }
+    tr:hover { background: rgba(255,255,255,.04); }
+    
+    .col-queries {
+      max-width: 280px;
+      min-width: 200px;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      padding-right: 4px;
+    }
+    .col-queries::-webkit-scrollbar { width: 4px; }
+    .col-queries::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .col-date { white-space: nowrap; font-size: 0.76rem; color: #94a3b8; }
+    .col-status { white-space: nowrap; }
+
+    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 9999px; font-size: .72rem; font-weight: 600; white-space: nowrap; }
+    .checked { background: rgba(16,185,129,.15); color: #6ee7b7; }
+    .not-checked { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .registration-id { color: #fed7aa; font-weight: 700; white-space: nowrap; }
+    .no-data { text-align: center; padding: 2.5rem; color: #64748b; }
+  </style>
+</head>
+<body>
+
+<script>
+  if (sessionStorage.getItem("rb_admin_logged_in") !== "true") {
+    window.location.href = "login.html?redirect=main.html";
+  }
+</script>
+
+<canvas id="aurora-canvas"></canvas>
+
+<div class="container">
+  <div class="header-panel">
+    <div>
+      <h1>🚩Resurgent Bharath🕉️</h1>
+      <h1>Attendees & Registrations</h1>
+      <p style="color:#94a3b8; font-size: .82rem; margin-top: 4px;">
+        Total: <span id="userCount" class="count-highlight">0</span> | Checked In: <span id="checkInCount" class="count-highlight">0</span>
+      </p>
+    </div>
+
+    <div class="actions">
+      <a href="scanner.html" class="btn btn-secondary">📷 Scan QR </a>
+      <a href="index.html" class="btn btn-secondary">← Registration</a>
+      <a href="welcome.html" class="btn btn-secondary">🎟 Find Pass</a>
+      <button id="exportExcelBtn" class="btn btn-success">Export Excel</button>
+      <button id="logoutBtn" class="btn btn-logout">Logout
+        <span style="display:block; font-size:0.65rem; opacity:0.8;">Must LogOut After Task</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-panel">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by ID, name, phone, or location...">
+    <span style="color:#94a3b8; font-size: .8rem;">Auto-sync active (15s)</span>
+  </div>
+
+  <div class="table-card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35px;">#</th>
+            <th style="width: 120px;">ID</th>
+            <th style="width: 110px;">Name</th>
+            <th style="width: 110px;">Phone</th>
+            <th style="width: 70px;">Age</th>
+            <th style="width: 80px;">Gender</th>
+            <th style="width: 100px;">Location</th>
+            <th style="width: 280px;">Tech Idea / Queries</th>
+            <th style="width: 140px;">Registered At</th>
+            <th style="width: 130px;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="10" class="no-data">Loading attendees...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const isFileProtocol = window.location.protocol === 'file:';
+  const API_BASE = isFileProtocol ? 'http://localhost:5000' : '';
+
+  let allUsers = [];
+
+  async function fetchAttendees() {
+    try {
+      const res = await fetch(`${API_BASE}/api/registrations`);
+      if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.success) {
+        allUsers = data.users || [];
+        renderTable();
+      } else {
+        showTableError(data.message || "Failed to fetch attendees.");
+      }
+    } catch(e) {
+      showTableError("Cannot connect to server. Ensure backend is running.");
+    }
+  }
+
+  function showTableError(msg) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = `<tr><td colspan="10" class="no-data" style="color:#fca5a5;">${msg}<br><button onclick="fetchAttendees()" class="btn btn-secondary" style="margin-top:10px; display:inline-block;">🔄 Retry</button></td></tr>`;
+  }
+
+  function renderTable() {
+    const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+    const filtered = allUsers.filter(u => 
+      (u.registration_id && u.registration_id.toLowerCase().includes(query)) ||
+      (u.name && u.name.toLowerCase().includes(query)) ||
+      (u.phone && u.phone.toLowerCase().includes(query)) ||
+      (u.location && u.location.toLowerCase().includes(query)) ||
+      (u.questions && u.questions.toLowerCase().includes(query))
+    );
+
+    document.getElementById("userCount").textContent = allUsers.length;
+    const checkedInCount = allUsers.filter(u => u.checked_in === "True").length;
+    document.getElementById("checkInCount").textContent = checkedInCount;
+
+    const tbody = document.getElementById("tableBody");
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" class="no-data">No attendees found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((u, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td class="registration-id">${u.registration_id || '-'}</td>
+        <td><strong>${u.name || '-'}</strong></td>
+        <td>${u.phone || '-'}</td>
+        <td>${u.age || '-'}</td>
+        <td>${u.gender || '-'}</td>
+        <td>${u.location || '-'}</td>
+        <td><div class="col-queries">${u.questions || '-'}</div></td>
+        <td class="col-date">${u.created_at || '-'}</td>
+        <td class="col-status">
+          <span class="badge ${u.checked_in === 'True' ? 'checked' : 'not-checked'}">
+            ${u.checked_in === 'True' ? 'Checked In' : 'Registered'}
+          </span>
+          ${u.checked_in !== 'True' ? `<button class="btn-checkin" onclick="manualCheckIn('${u.registration_id}')">Check In</button>` : ''}
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  async function manualCheckIn(regId) {
+    if (!confirm(`Confirm check-in for attendee ${regId}?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/check-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationId: regId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchAttendees();
+      } else {
+        alert(data.message || "Failed to check in");
+      }
+    } catch(err) {
+      alert("Network error while checking in");
+    }
+  }
+
+  let searchDebounce;
+  const searchEl = document.getElementById("searchInput");
+  if (searchEl) {
+    searchEl.addEventListener("input", () => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(renderTable, 200);
+    });
+  }
+
+  const exportBtn = document.getElementById("exportExcelBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      if (allUsers.length === 0) return alert("No data to export");
+      const ws = XLSX.utils.json_to_sheet(allUsers);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Attendees");
+      XLSX.writeFile(wb, "Attendees_List.xlsx");
+    });
+  }
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("rb_admin_logged_in");
+      sessionStorage.removeItem("rb_admin_user");
+      window.location.href = "login.html";
+    });
+  }
+
+  fetchAttendees();
+  
+  setInterval(() => {
+    if (document.activeElement !== document.getElementById("searchInput")) {
+      fetchAttendees();
+    }
+  }, 15000);
+</script>
+
+<script>
+  (function initAurora() {
+    const canvas = document.getElementById("aurora-canvas");
+    const gl = canvas.getContext("webgl");
+    if (!gl) return;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const vsSource = `attribute vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
+    const fsSource = `
+      precision mediump float;
+      uniform float uTime;
+      uniform vec2 uResolution;
+      void main() {
+        vec2 uv = gl_FragCoord.xy / uResolution;
+        float wave1 = sin(uv.x * 3.0 + uTime * 0.6) * 0.16;
+        float wave2 = cos(uv.x * 4.5 - uTime * 0.45) * 0.12;
+        float wave = wave1 + wave2;
+        float intensity = smoothstep(0.20, 0.80, 1.0 - abs(uv.y - 0.5 - wave));
+        
+        vec3 col1 = vec3(0.92, 0.48, 0.18);
+        vec3 col2 = vec3(0.58, 0.42, 0.75);
+        vec3 bgCol = vec3(0.02, 0.03, 0.07);
+
+        vec3 color = mix(col1, col2, uv.x + sin(uTime * 0.25) * 0.3);
+        vec3 finalColor = mix(bgCol, color, intensity * 0.52);
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `;
+
+    function createShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      return shader;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+    gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+
+    const posLoc = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const timeLoc = gl.getUniformLocation(program, "uTime");
+    const resLoc = gl.getUniformLocation(program, "uResolution");
+
+    function render(time) {
+      gl.uniform1f(timeLoc, time * 0.001);
+      gl.uniform2f(resLoc, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  })();
+</script>
+</body>
+</html>
